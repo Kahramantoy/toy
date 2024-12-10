@@ -1,0 +1,37 @@
+import yfinance as yf
+import pandas as pd
+
+# Hisse senetlerinin listesi (BIST hisseleri)
+# Buraya BIST hisselerinin sembollerini ekleyin
+hisse_listesi = ['AKBNK.IS', 'GARAN.IS', 'THYAO.IS']  # Örnek semboller
+
+# Zaman dilimlerini tanımla
+zaman_dilimleri = ['5m', '15m', '1h', '2h']
+
+# Düşüşü kontrol eden fonksiyon
+def dusen_hisseler(hisse_listesi, zaman_dilimi):
+    dusen_hisseler = []
+    for hisse in hisse_listesi:
+        # Veriyi indir
+        veri = yf.download(hisse, period='2d', interval=zaman_dilimi)
+        
+        # Eğer veri yoksa geç
+        if veri.empty:
+            continue
+        
+        # Günlük kapanış fiyatlarını al
+        kapanis_fiyatlari = veri['Close']
+        
+        # Son iki kapanış fiyatını al
+        son_fiyat = kapanis_fiyatlari.iloc[-1]
+        onceki_fiyat = kapanis_fiyatlari.iloc[-2]
+        
+        # Düşüş kontrolü
+        if son_fiyat < onceki_fiyat:
+            dusen_hisseler.append(hisse)
+    
+    return dusen_hisseler
+
+# Sonuçları yazdır
+for zaman_dilimi in zaman_dilimleri:
+    print(f"{zaman_dilimi} periyotta düşen hisseler: {dusen_hisseler(hisse_listesi, zaman_dilimi)}")
